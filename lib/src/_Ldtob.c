@@ -1,8 +1,8 @@
 #include "libultra_internal.h"
+#include <macros.h>
 #include <stdlib.h>
 #include <string.h>
 #include "printf.h"
-#include <unused.h>
 
 #define BUFF_LEN 0x20
 

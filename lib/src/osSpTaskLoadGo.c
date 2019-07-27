@@ -1,6 +1,6 @@
 #include "libultra_internal.h"
 #include "hardware.h"
-#include <unused.h>
+#include <macros.h>
 
 #define _osVirtualToPhysical(ptr)               \
     if (ptr != NULL)                            \

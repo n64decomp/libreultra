@@ -34,9 +34,9 @@ const u32 flags_arr[] = {FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS
 char _spaces[] = "                                ";
 char _zeroes[] = "00000000000000000000000000000000";
 
-void _Putfld(printf_struct *, va_list *, u8, u8 *);
+static void _Putfld(printf_struct *, va_list *, u8, u8 *);
 
-s32 _Printf(char *prout(char *, const char *, size_t), char *dst, const char *fmt, va_list args)
+s32 _Printf(char *(*prout)(char *, const char *, size_t), char *dst, const char *fmt, va_list args)
 {
     printf_struct sp78;
     const u8 *fmt_ptr;
@@ -56,16 +56,16 @@ s32 _Printf(char *prout(char *, const char *, size_t), char *dst, const char *fm
                 break;
             }
         }
-        _PROUT(dst, fmt, (s32)fmt_ptr - (s32)fmt);
+        _PROUT(dst, fmt, fmt_ptr - (u8 *)fmt);
         if (c == 0)
             return sp78.size;
-        sp78.flags = 0;
         fmt = (char *)++fmt_ptr;
-        for (flag_index = strchr(flags_str, *fmt_ptr); flag_index != NULL; flag_index = strchr(flags_str, *++fmt_ptr))
+        sp78.flags = 0;
+        for (; (flag_index = strchr(flags_str, *fmt_ptr)) != NULL; fmt_ptr++)
         {
             sp78.flags |= flags_arr[flag_index - flags_str];
         }
-        if (fmt_ptr[0] == '*')
+        if (*fmt_ptr == '*')
         {
             sp78.width = va_arg(args, s32);
             if (sp78.width < 0)
@@ -107,7 +107,13 @@ s32 _Printf(char *prout(char *, const char *, size_t), char *dst, const char *fm
             fmt_ptr++;
         }
         _Putfld(&sp78, &args, *fmt_ptr, sp4c);
-        sp78.width = sp78.width - (sp78.part1_len + sp78.num_leading_zeros + sp78.part2_len + sp78.num_mid_zeros + sp78.part3_len + sp78.num_trailing_zeros);
+        sp78.width -=
+            sp78.part1_len +
+            sp78.num_leading_zeros +
+            sp78.part2_len +
+            sp78.num_mid_zeros +
+            sp78.part3_len +
+            sp78.num_trailing_zeros;
         _PAD(sp44, sp78.width, sp48, _spaces, !(sp78.flags & FLAGS_MINUS));
         _PROUT(dst, (char *)sp4c, sp78.part1_len);
         _PAD(sp3c, sp78.num_leading_zeros, sp40, _zeroes, 1);
@@ -120,7 +126,7 @@ s32 _Printf(char *prout(char *, const char *, size_t), char *dst, const char *fm
     }
 }
 
-void _Putfld(printf_struct *a0, va_list *args, u8 type, u8 *buff)
+static void _Putfld(printf_struct *a0, va_list *args, u8 type, u8 *buff)
 {
     a0->part1_len = a0->num_leading_zeros = a0->part2_len = a0->num_mid_zeros = a0->part3_len = a0->num_trailing_zeros = 0;
 

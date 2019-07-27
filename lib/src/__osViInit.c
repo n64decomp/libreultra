@@ -1,7 +1,7 @@
 #include "libultra_internal.h"
 #include "hardware.h"
 
-#ifdef VERSION_US
+#ifndef VERSION_JP
 extern u32 osTvType;
 #endif 
 
@@ -16,7 +16,7 @@ extern OSViMode D_803349E0;
 void __osViInit(void)
 {
 //#ifdef VERSION_JP
-#ifdef VERSION_US
+#ifndef VERSION_JP
     D_80334918 = osTvType;
 #endif
     bzero(D_803348B0, sizeof(D_803348B0));
@@ -44,7 +44,7 @@ void __osViInit(void)
     }
     D_80334914->unk00 = 32;
     D_80334914->features = D_80334914->unk08->comRegs.ctrl;
-#ifdef VERSION_US
+#ifndef VERSION_JP
     while (HW_REG(VI_CURRENT_REG, u32) > 0xa)
         ;
     HW_REG(VI_STATUS_REG, u32) = 0;

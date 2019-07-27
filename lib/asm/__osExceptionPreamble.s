@@ -135,10 +135,10 @@ glabel __osException
 /* 0E1890 80326890 00000000 */   nop   
 /* 0E1894 80326894 3C0AC000 */  lui   $t2, %hi(D_C0000008) # $t2, 0xc000
 /* 0E1898 80326898 AD400008 */  sw    $zero, %lo(D_C0000008)($t2)
-/* 0E189C 8032689C 3C04C000 */  lui   $a0, 0xc000
+/* 0E189C 8032689C 3C04C000 */  lui   $a0, %hi(D_C0000000)
 /* 0E18A0 803268A0 254A0008 */  addiu $t2, %lo(D_C0000008) # addiu $t2, $t2, 8
 /* 0E18A4 803268A4 0C0CA6EE */  jal   kdebugserver
-/* 0E18A8 803268A8 8C840000 */   lw    $a0, ($a0)
+/* 0E18A8 803268A8 8C840000 */   lw    $a0, %lo(D_C0000000)($a0)
 /* 0E18AC 803268AC 10000156 */  b     .L80326E08
 /* 0E18B0 803268B0 00000000 */   nop   
 .L803268B4:
@@ -289,9 +289,9 @@ glabel L803269B8
 /* 0E1ABC 80326ABC 11200007 */  beqz  $t1, .L80326ADC
 /* 0E1AC0 80326AC0 00000000 */   nop   
 /* 0E1AC4 80326AC4 24090800 */  li    $t1, 2048
-/* 0E1AC8 80326AC8 3C01A430 */  lui   $at, 0xa430
+/* 0E1AC8 80326AC8 3C01A430 */  lui   $at, %hi(D_A4300000)
 /* 0E1ACC 80326ACC 3231001F */  andi  $s1, $s1, 0x1f
-/* 0E1AD0 80326AD0 AC290000 */  sw    $t1, ($at)
+/* 0E1AD0 80326AD0 AC290000 */  sw    $t1, %lo(D_A4300000)($at)
 /* 0E1AD4 80326AD4 0C0C9B06 */  jal   send_mesg
 /* 0E1AD8 80326AD8 24040048 */   li    $a0, 72
 .L80326ADC:

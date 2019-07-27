@@ -19,7 +19,7 @@ size_t strlen(const u8 *str)
     return ptr - str;
 }
 
-const u8 *strchr(const u8 *str, u32 ch)
+const u8 *strchr(const u8 *str, s32 ch)
 {
     u8 c = ch;
     while (*str != c)

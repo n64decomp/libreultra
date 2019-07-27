@@ -18,14 +18,6 @@ typedef struct
     u32 start;
     u32 end;
     u32 count;
-    ADPCM_STATE state;
-} ALADPCMloop;
-
-typedef struct
-{
-    u32 start;
-    u32 end;
-    u32 count;
 } ALRawLoop;
 
 typedef struct

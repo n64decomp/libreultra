@@ -1,8 +1,9 @@
 #include "libultra_internal.h"
 #include "osContInternal.h"
+#include <macros.h>
 
 OSContPackedStruct D_80365CE0[7];
-static u32 unused; //padding between these two variables
+UNUSED static u32 unused; //padding between these two variables
 u32 D_80365D1C;
 
 extern u8 D_80365D20;

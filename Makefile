@@ -106,10 +106,10 @@ OBJDUMP   := $(CROSS)objdump
 OBJCOPY   := $(CROSS)objcopy
 
 # Check code syntax with host compiler
-CC_CHECK := gcc -fsyntax-only -fsigned-char -nostdinc -I include -I $(BUILD_DIR)/include -I src -std=gnu90 -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(VERSION_CFLAGS) $(GRUCODE_CFLAGS)
+CC_CHECK := gcc -fsyntax-only -fsigned-char -nostdinc -I include -I $(BUILD_DIR)/include -std=gnu90 -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(VERSION_CFLAGS) $(GRUCODE_CFLAGS)
 
 ASFLAGS := -march=vr4300 -mabi=32 -I include -I $(BUILD_DIR) $(VERSION_ASFLAGS) $(GRUCODE_ASFLAGS)
-CFLAGS = -Wab,-r4300_mul -non_shared -G 0 -Xcpluscomm -Xfullwarn $(OPT_FLAGS) -signed -I include -I $(BUILD_DIR)/include -I src -D_LANGUAGE_C $(VERSION_CFLAGS) $(MIPSISET) $(GRUCODE_CFLAGS)
+CFLAGS = -Wab,-r4300_mul -non_shared -G 0 -Xcpluscomm -Xfullwarn $(OPT_FLAGS) -signed -I include -I $(BUILD_DIR)/include -D_LANGUAGE_C $(VERSION_CFLAGS) $(MIPSISET) $(GRUCODE_CFLAGS)
 OBJCOPYFLAGS := --pad-to=0x800000 --gap-fill=0xFF
 SYMBOL_LINKING_FLAGS := $(addprefix -R ,$(SEG_FILES))
 LDFLAGS := -T undefined_syms.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.map --no-check-sections $(SYMBOL_LINKING_FLAGS)
@@ -170,8 +170,15 @@ $(BUILD_DIR)/lib/src/math/%.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/lib/src/math/ll%.o: OPT_FLAGS :=
 $(BUILD_DIR)/lib/src/ldiv.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/lib/src/string.o: OPT_FLAGS := -O2
-# $(BUILD_DIR)/lib/src/gu%.o: OPT_FLAGS := -O3
-# $(BUILD_DIR)/lib/src/al%.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/lib/src/gu%.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/lib/src/al%.o: OPT_FLAGS := -O3
+
+ifeq ($(VERSION),eu)
+$(BUILD_DIR)/lib/src/_Litob.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/lib/src/_Ldtob.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/lib/src/_Printf.o: OPT_FLAGS := -O3
+endif
+
 
 # Rebuild files with '#ifdef NON_MATCHING' when that macro changes.
 $(NON_MATCHING_O_FILES): $(NON_MATCHING_DEP).$(NON_MATCHING)

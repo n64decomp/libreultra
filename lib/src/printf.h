@@ -30,7 +30,7 @@ typedef struct
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8
 #define FLAGS_ZERO 16
-s32 _Printf(char *prout(char *, const char *, size_t), char *dst, const char *fmt, va_list args);
+s32 _Printf(char *(*prout)(char *, const char *, size_t), char *dst, const char *fmt, va_list args);
 void _Litob(printf_struct *args, u8 type);
 void _Ldtob(printf_struct *args, u8 type);
 #endif
