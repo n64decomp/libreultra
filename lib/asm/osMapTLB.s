@@ -2,14 +2,13 @@
 .set gp=64
 
 .include "macros.inc"
-
-
-.section .text, "ax" 
+.section .text, "ax"
 
 # This file is handwritten
 
-#void osMapTLB(s32 index, OSPageMask pm, void *vaddr, u32 evenpaddr, 
+#void osMapTLB(s32 index, OSPageMask pm, void *vaddr, u32 evenpaddr,
 #    u32 oddpaddr, s32 asid);
+
 glabel osMapTLB
     mfc0  $t0, $10
     mtc0  $a0, $0
@@ -61,4 +60,3 @@ glabel osMapTLB
     nop   
     nop   
     nop   
-    

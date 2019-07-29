@@ -1,39 +1,36 @@
-
 .set noat      # allow manual use of $at
 .set noreorder # don't insert nops after branches
 .set gp=64
 
 .include "macros.inc"
+.eqv MI_INTR_MASK_REG, 0xA430000C
+.section .text, "ax"
 
-.eqv MI_INTR_MASK_REG, 0xA430000C 
-
-.section .text, "ax" 
-  
 glabel osSetIntMask
-	mfc0  $t1, $12
-	andi  $v0, $t1, 0xff01
-	lui   $t2, %hi(MI_INTR_MASK_REG) # $t2, 0xa430
-	lw    $t2, %lo(MI_INTR_MASK_REG)($t2)
-	sll   $t2, $t2, 0x10
-	or    $v0, $v0, $t2
-	lui   $at, 0x3f
-	and   $t0, $a0, $at
-	srl   $t0, $t0, 0xf
-	lui   $t2, %hi(D_803386D0)
-	addu  $t2, $t2, $t0
-	lhu   $t2, %lo(D_803386D0)($t2)
-	lui   $at, %hi(MI_INTR_MASK_REG) # $at, 0xa430
-	sw    $t2, %lo(MI_INTR_MASK_REG)($at)
-	andi  $t0, $a0, 0xff01
-	lui   $at, (0xFFFF00FF >> 16) # lui $at, 0xffff
-	ori   $at, (0xFFFF00FF & 0xFFFF) # ori $at, $at, 0xff
-	and   $t1, $t1, $at
-	or    $t1, $t1, $t0
-	mtc0  $t1, $12
-	nop   
-	nop   
-	jr    $ra
-	 nop   
+    mfc0  $t1, $12
+    andi  $v0, $t1, 0xff01
+    lui   $t2, %hi(MI_INTR_MASK_REG) # $t2, 0xa430
+    lw    $t2, %lo(MI_INTR_MASK_REG)($t2)
+    sll   $t2, $t2, 0x10
+    or    $v0, $v0, $t2
+    lui   $at, 0x3f
+    and   $t0, $a0, $at
+    srl   $t0, $t0, 0xf
+    lui   $t2, %hi(D_803386D0)
+    addu  $t2, $t2, $t0
+    lhu   $t2, %lo(D_803386D0)($t2)
+    lui   $at, %hi(MI_INTR_MASK_REG) # $at, 0xa430
+    sw    $t2, %lo(MI_INTR_MASK_REG)($at)
+    andi  $t0, $a0, 0xff01
+    lui   $at, (0xFFFF00FF >> 16) # lui $at, 0xffff
+    ori   $at, (0xFFFF00FF & 0xFFFF) # ori $at, $at, 0xff
+    and   $t1, $t1, $at
+    or    $t1, $t1, $t0
+    mtc0  $t1, $12
+    nop   
+    nop   
+    jr    $ra
+     nop   
 
 
 .section .rodata
