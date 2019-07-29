@@ -2,18 +2,16 @@
 
 ### Default target ###
 
+# don't touch
 default: libultra
-
-### Build Options ###
-# Version of the game to build and graphics microcode used
-VERSION ?= us
+# which sm64 release of libultra to use. eu release type provides the most libultra code
+VERSION ?= eu
 
 # If ENDIAN_IND is 1, enable non-matching code changes that try to ensure
 # endianness independence
 ENDIAN_IND ?= 0
 
 # Release
-
 ifeq ($(VERSION),jp)
   VERSION_CFLAGS := -DVERSION_JP=1
   VERSION_ASFLAGS := --defsym VERSION_JP=1
@@ -22,7 +20,12 @@ ifeq ($(VERSION),us)
   VERSION_CFLAGS := -DVERSION_US=1
   VERSION_ASFLAGS := --defsym VERSION_US=1
 else
+ifeq ($(VERSION),eu)
+  VERSION_CFLAGS := -DVERSION_EU=1
+  VERSION_ASFLAGS := --defsym VERSION_EU=1
+else
   $(error unknown version "$(VERSION)")
+endif
 endif
 endif
 
@@ -38,42 +41,22 @@ BUILD_DIR_BASE := build
 BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)
 
 LIBULTRA := $(BUILD_DIR)/libultra.a
-ROM := $(BUILD_DIR)/$(TARGET).z64
-ELF := $(BUILD_DIR)/$(TARGET).elf
-LD_SCRIPT := sm64.ld
-MIO0_DIR := $(BUILD_DIR)/mio0
-TEXTURE_DIR := textures
-ACTOR_DIR := actors
 
 # Directories containing source files
-# SRC_DIRS := src src/engine src/game src/goddard src/goddard/dynlists src/audio
-ASM_DIRS := asm actors lib data levels assets text
-BIN_DIRS := bin
-
 ULTRA_SRC_DIRS := lib/src lib/src/math
 ULTRA_ASM_DIRS := lib/asm lib/data
 ULTRA_BIN_DIRS := lib/bin
 
-LEVEL_DIRS := $(patsubst levels/%,%,$(dir $(wildcard levels/*/header.s)))
 
 MIPSISET := -mips2 -32
 OPT_FLAGS := -O2
 
 # Source code files
-C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
-S_FILES := $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s))
 ULTRA_C_FILES := $(foreach dir,$(ULTRA_SRC_DIRS),$(wildcard $(dir)/*.c))
 ULTRA_S_FILES := $(foreach dir,$(ULTRA_ASM_DIRS),$(wildcard $(dir)/*.s))
 LEVEL_S_FILES := $(addsuffix header.s,$(addprefix bin/,$(LEVEL_DIRS)))
-SEG_IN_FILES := $(foreach dir,$(BIN_DIRS),$(wildcard $(dir)/*.s.in))
-SEG_S_FILES := $(foreach dir,$(BIN_DIRS),$(wildcard $(dir)/*.s)) \
-               $(foreach file,$(SEG_IN_FILES),$(file:.s.in=.s))
 
 # Object files
-O_FILES := $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file:.c=.o)) \
-           $(foreach file,$(S_FILES),$(BUILD_DIR)/$(file:.s=.o)) \
-           $(foreach file,$(LEVEL_S_FILES),$(BUILD_DIR)/$(file:.s=.o))
-
 ULTRA_O_FILES := $(foreach file,$(ULTRA_S_FILES),$(BUILD_DIR)/$(file:.s=.o)) \
                  $(foreach file,$(ULTRA_C_FILES),$(BUILD_DIR)/$(file:.c=.o))
 
@@ -107,7 +90,6 @@ OBJCOPY   := $(CROSS)objcopy
 
 # Check code syntax with host compiler
 CC_CHECK := gcc -fsyntax-only -fsigned-char -nostdinc -I include -I $(BUILD_DIR)/include -std=gnu90 -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(VERSION_CFLAGS) $(GRUCODE_CFLAGS)
-
 ASFLAGS := -march=vr4300 -mabi=32 -I include -I $(BUILD_DIR) $(VERSION_ASFLAGS) $(GRUCODE_ASFLAGS)
 CFLAGS = -Wab,-r4300_mul -non_shared -G 0 -Xcpluscomm -Xfullwarn $(OPT_FLAGS) -signed -I include -I $(BUILD_DIR)/include -D_LANGUAGE_C $(VERSION_CFLAGS) $(MIPSISET) $(GRUCODE_CFLAGS)
 OBJCOPYFLAGS := --pad-to=0x800000 --gap-fill=0xFF
@@ -146,9 +128,6 @@ endif
 ######################## Targets #############################
 
 all: $(ROM)
-ifeq ($(COMPARE),1)
-	@$(SHA1SUM) -c $(TARGET).sha1
-endif
 
 clean:
 	$(RM) -r $(BUILD_DIR_BASE)
@@ -158,7 +137,7 @@ libultra: $(BUILD_DIR)/libultra.a
 $(BUILD_DIR)/lib/bin/ipl3_font.bin: lib/ipl3_font.png | $(BUILD_DIR)
 	$(IPLFONTUTIL) e $< $@
 
-ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(ASM_DIRS) $(ULTRA_SRC_DIRS) $(ULTRA_ASM_DIRS) $(ULTRA_BIN_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) $(addprefix levels/,$(LEVEL_DIRS)) $(addprefix bin/,$(LEVEL_DIRS)) include) $(MIO0_DIR) $(addprefix $(MIO0_DIR)/,$(LEVEL_DIRS))
+ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(ASM_DIRS) $(ULTRA_SRC_DIRS) $(ULTRA_ASM_DIRS) $(ULTRA_BIN_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) include)
 
 # Make sure build directory exists before compiling anything
 DUMMY != mkdir -p $(ALL_DIRS)
@@ -195,30 +174,13 @@ $(BUILD_DIR)/%.o: %.c
 	@$(CC_CHECK) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-
 $(BUILD_DIR)/%.o: %.s $(MIO0_FILES)
 	$(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@ $<
-
-$(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
-	$(CPP) $(VERSION_CFLAGS) -I include/ -DBUILD_DIR=$(BUILD_DIR) -o $@ $<
 
 $(BUILD_DIR)/libultra.a: $(ULTRA_O_FILES)
 	$(AR) rcs -o $@ $(ULTRA_O_FILES)
 
-$(ELF): $(O_FILES) $(MIO0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) undefined_syms.txt $(BUILD_DIR)/libultra.a
-	$(LD) -L $(BUILD_DIR) $(LDFLAGS) -o $@ $(O_FILES)$(LIBS) -lultra
-
-$(ROM): $(ELF)
-	$(OBJCOPY) $(OBJCOPYFLAGS) $< $(@:.z64=.bin) -O binary
-	$(N64CKSUM) $(@:.z64=.bin) $@
-
-$(BUILD_DIR)/$(TARGET).objdump: $(ELF)
-	$(OBJDUMP) -D $< > $@
-
-
-
 .PHONY: all clean default diff test load libultra
-.PRECIOUS: $(BUILD_DIR)/mio0/%.mio0 $(BUILD_DIR)/bin/%.elf $(BUILD_DIR)/mio0/%.mio0.s
 
 # Remove built-in rules, to improve performance
 MAKEFLAGS += --no-builtin-rules
