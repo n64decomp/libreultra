@@ -2,14 +2,15 @@
 #include <rmon.h>
 #include <os.h>
 
-void osSyncPrintf(const char *fmt, ...)
+char *osSyncPrintf(char *arg0, const char *arg1, size_t size)
 {
-    int ans;
-    va_list ap;
-    // these functions intentionally left blank.  ifdeffed out in rom release
+    // This function left blank. Ifdeffed out in rom release
+    return (1);
 }
 void rmonPrintf(const char *fmt, ...)
 {
-    int ans;
-    va_list ap;
+    va_list args;
+    va_start(args, fmt);
+    _Printf(osSyncPrintf, NULL, fmt, args);
+    va_end(args);
 }
