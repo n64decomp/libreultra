@@ -2,7 +2,7 @@
 #include <rmon.h>
 #include <os.h>
 
-s32 osSyncPrintf(s32 arg0, s32 arg1, s32 arg2)
+char *osSyncPrintf(char *arg0, const char *arg1, size_t size)
 {
     // This function left blank. Ifdeffed out in rom release
     return (1);
